@@ -89,11 +89,18 @@ impl Ray {
     fn at(&self, time: f32) -> Point {
         self.origin + self.direction * time
     }
-    fn color(&self, sphere: &Sphere) -> Color {
-        let t = sphere.is_hit_by(&self);
-        if t > 0.0 {
-            let normal = (self.at(t) - sphere.center).as_unit_vector();
-            return 0.5 * (normal + 1.0);
+    fn color(&self, world: &HittableList) -> Color {
+        match world.hit(&self, 0.0, f32::MAX) {
+            Some(impact) => {
+                return 0.5
+                    * (impact.normal
+                        + Color {
+                            x: 1.0,
+                            y: 1.0,
+                            z: 1.0,
+                        })
+            }
+            None => (),
         }
         let unit_direction = self.direction.as_unit_vector();
         let t = 0.5 * (unit_direction.y + 1.0);
@@ -110,24 +117,81 @@ impl Ray {
     }
 }
 
+struct RayImpact {
+    point: Point,
+    normal: Vector,
+    t: f32,
+    front_face: bool, // is the ray impact from the outside?
+}
+
+impl RayImpact {
+    fn new(point: &Vector, t: f32, ray: &Ray, outward_normal: &Vector) -> RayImpact {
+        let front_face = ray.direction.dot(outward_normal) < 0.0;
+        let normal = if front_face {
+            *outward_normal
+        } else {
+            outward_normal * -1.0
+        };
+        RayImpact {
+            point: *point,
+            normal,
+            t,
+            front_face,
+        }
+    }
+}
+
+trait Hittable {
+    fn hit(&self, ray: &Ray, t_min: f32, t_max: f32) -> Option<RayImpact>;
+}
+
 #[derive(Debug)]
 struct Sphere {
     center: Point,
     radius: f32,
 }
 
-impl Sphere {
-    fn is_hit_by(&self, ray: &Ray) -> f32 {
+impl Hittable for Sphere {
+    fn hit(&self, ray: &Ray, t_min: f32, t_max: f32) -> Option<RayImpact> {
         let oc: Vector = ray.origin - self.center;
         let a = ray.direction.norm_squared();
         let half_b = oc.dot(&ray.direction);
         let c = oc.norm_squared() - self.radius * self.radius;
         let discriminant = f32::powi(half_b, 2) - a * c;
         if discriminant < 0.0 {
-            -1.0
-        } else {
-            (-half_b - discriminant.sqrt()) / a
+            return None;
         }
+
+        let discriminant_sqrt = discriminant.sqrt();
+        // Find the nearest root that lies in the acceptable range of t
+        let root = (-half_b - discriminant_sqrt) / a;
+        if root < t_min || root > t_max {
+            let root = (-half_b + discriminant_sqrt) / a;
+            if root < t_min || root > t_max {
+                return None;
+            }
+        }
+        let point = ray.at(root);
+        let outward_normal = (point - self.center) / self.radius;
+        Some(RayImpact::new(&point, root, ray, &outward_normal))
+    }
+}
+
+struct HittableList {
+    objects: Vec<Box<dyn Hittable>>,
+}
+
+impl Hittable for HittableList {
+    fn hit(&self, ray: &Ray, t_min: f32, t_max: f32) -> Option<RayImpact> {
+        let mut closest_impact: Option<RayImpact> = None;
+        let mut closest_so_far = t_max;
+        for object in &self.objects {
+            if let Some(impact) = object.hit(ray, t_min, closest_so_far) {
+                closest_so_far = impact.t;
+                closest_impact = Some(impact);
+            }
+        }
+        closest_impact
     }
 }
 
@@ -164,21 +228,30 @@ fn main() -> std::io::Result<()> {
             z: focal_length,
         };
 
-    let mut file = File::create("foo.ppm")?;
-
-    write!(file, "P3\n{} {}\n255\n", image_width, image_height)?;
-
-    let bar = ProgressBar::new(image_height.into());
-
-    let sphere = Sphere {
+    let mut world = HittableList {
+        objects: Vec::new(),
+    };
+    world.objects.push(Box::new(Sphere {
         center: Point {
             x: 0.0,
             y: 0.0,
             z: -1.0,
         },
         radius: 0.5,
-    };
+    }));
+    world.objects.push(Box::new(Sphere {
+        center: Point {
+            x: 0.0,
+            y: -100.5,
+            z: -1.0,
+        },
+        radius: 100.0,
+    }));
 
+    let mut file = File::create("foo.ppm")?;
+    write!(file, "P3\n{} {}\n255\n", image_width, image_height)?;
+
+    let bar = ProgressBar::new(image_height.into());
     for y in (0..image_height).rev() {
         bar.inc(1);
         for x in 0..image_width {
@@ -188,7 +261,7 @@ fn main() -> std::io::Result<()> {
                 origin,
                 direction: lower_left_corner + horizontal * u + vertical * v - origin,
             };
-            ray.color(&sphere).write_color(&file)?;
+            ray.color(&world).write_color(&file)?;
         }
     }
 
