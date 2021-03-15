@@ -90,17 +90,14 @@ impl Ray {
         self.origin + self.direction * time
     }
     fn color(&self, world: &HittableList) -> Color {
-        match world.hit(&self, 0.0, f32::MAX) {
-            Some(impact) => {
-                return 0.5
-                    * (impact.normal
-                        + Color {
-                            x: 1.0,
-                            y: 1.0,
-                            z: 1.0,
-                        })
-            }
-            None => (),
+        if let Some(impact) = world.hit(&self, 0.0, f32::MAX) {
+            return 0.5
+                * (impact.normal
+                    + Color {
+                        x: 1.0,
+                        y: 1.0,
+                        z: 1.0,
+                    });
         }
         let unit_direction = self.direction.as_unit_vector();
         let t = 0.5 * (unit_direction.y + 1.0);
