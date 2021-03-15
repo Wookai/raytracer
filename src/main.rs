@@ -16,7 +16,19 @@ use crate::hittable::HittableList;
 use crate::sphere::*;
 use crate::vector::*;
 
+use Vector as Color;
 use Vector as Point;
+
+fn write_color(color: &Color, mut file: &std::fs::File) -> std::io::Result<()> {
+    writeln!(
+        &mut file,
+        "{:.0} {:.0} {:.0}",
+        color.x * 255.0,
+        color.y * 255.0,
+        color.z * 255.0
+    )?;
+    Ok(())
+}
 
 fn main() -> std::io::Result<()> {
     let aspect_ratio = 16.0 / 9.0;
@@ -54,7 +66,8 @@ fn main() -> std::io::Result<()> {
         for x in 0..image_width {
             let u = x as f32 / (image_width as f32 - 1.0);
             let v = y as f32 / (image_height as f32 - 1.0);
-            camera.get_ray(u, v).color(&world).write_color(&file)?;
+            let color = camera.get_ray(u, v).color(&world);
+            write_color(&color, &file)?;
         }
     }
 

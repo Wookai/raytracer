@@ -1,4 +1,3 @@
-use std::io::prelude::*;
 use std::ops;
 
 #[derive(Debug, Clone, Copy)]
@@ -9,17 +8,6 @@ pub struct Vector {
 }
 
 impl Vector {
-    pub fn write_color(&self, mut file: &std::fs::File) -> std::io::Result<()> {
-        writeln!(
-            &mut file,
-            "{:.0} {:.0} {:.0}",
-            self.x * 255.0,
-            self.y * 255.0,
-            self.z * 255.0
-        )?;
-        Ok(())
-    }
-
     pub fn norm_squared(&self) -> f32 {
         self.x * self.x + self.y * self.y + self.z * self.z
     }
