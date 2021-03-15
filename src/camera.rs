@@ -17,7 +17,7 @@ impl Camera {
         let focal_length = 1.0;
         let origin = Point::new(0.0, 0.0, 0.0);
         let horizontal = Vector::new(viewport_width, 0.0, 0.0);
-        let vertical = Vector::new(0.0, viewport_width, 0.0);
+        let vertical = Vector::new(0.0, viewport_height, 0.0);
         let lower_left_corner: Vector =
             origin - horizontal / 2.0 - vertical / 2.0 - Vector::new(0.0, 0.0, focal_length);
 
