@@ -41,19 +41,11 @@ fn main() -> std::io::Result<()> {
         objects: Vec::new(),
     };
     world.objects.push(Box::new(Sphere {
-        center: Point {
-            x: 0.0,
-            y: 0.0,
-            z: -1.0,
-        },
+        center: Point::new(0.0, 0.0, -1.0),
         radius: 0.5,
     }));
     world.objects.push(Box::new(Sphere {
-        center: Point {
-            x: 0.0,
-            y: -100.5,
-            z: -1.0,
-        },
+        center: Point::new(0.0, -100.5, -1.0),
         radius: 100.0,
     }));
 
