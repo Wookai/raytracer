@@ -1,4 +1,5 @@
 use std::ops;
+use std::ops::AddAssign;
 
 #[derive(Debug, Clone, Copy)]
 pub struct Vector {
@@ -34,3 +35,11 @@ impl_op_ex_commutative!(*|a: &Vector, b: f32| -> Vector { Vector::new(a.x * b, a
 impl_op_ex_commutative!(/|a: &Vector, b: f32| -> Vector {
     Vector::new(a.x / b, a.y / b, a.z / b)
 });
+
+impl AddAssign for Vector {
+    fn add_assign(&mut self, other: Self) {
+        self.x += other.x;
+        self.y += other.y;
+        self.z += other.z;
+    }
+}
