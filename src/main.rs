@@ -5,125 +5,17 @@ use std::io::prelude::*;
 #[macro_use]
 extern crate impl_ops;
 
+mod hittable;
+mod ray;
+mod sphere;
 mod vector;
 
+use crate::hittable::*;
+use crate::ray::*;
+use crate::sphere::*;
 use crate::vector::*;
 
 use Vector as Point;
-use Vector as Color;
-
-#[derive(Debug)]
-struct Ray {
-    origin: Point,
-    direction: Vector,
-}
-
-impl Ray {
-    fn at(&self, time: f32) -> Point {
-        self.origin + self.direction * time
-    }
-    fn color(&self, world: &HittableList) -> Color {
-        if let Some(impact) = world.hit(&self, 0.0, f32::MAX) {
-            return 0.5
-                * (impact.normal
-                    + Color {
-                        x: 1.0,
-                        y: 1.0,
-                        z: 1.0,
-                    });
-        }
-        let unit_direction = self.direction.as_unit_vector();
-        let t = 0.5 * (unit_direction.y + 1.0);
-        Color {
-            x: 1.0,
-            y: 1.0,
-            z: 1.0,
-        } * (1.0 - t)
-            + Color {
-                x: 0.5,
-                y: 0.7,
-                z: 1.0,
-            } * t
-    }
-}
-
-struct RayImpact {
-    point: Point,
-    normal: Vector,
-    t: f32,
-    front_face: bool, // is the ray impact from the outside?
-}
-
-impl RayImpact {
-    fn new(point: &Vector, t: f32, ray: &Ray, outward_normal: &Vector) -> RayImpact {
-        let front_face = ray.direction.dot(outward_normal) < 0.0;
-        let normal = if front_face {
-            *outward_normal
-        } else {
-            outward_normal * -1.0
-        };
-        RayImpact {
-            point: *point,
-            normal,
-            t,
-            front_face,
-        }
-    }
-}
-
-trait Hittable {
-    fn hit(&self, ray: &Ray, t_min: f32, t_max: f32) -> Option<RayImpact>;
-}
-
-#[derive(Debug)]
-struct Sphere {
-    center: Point,
-    radius: f32,
-}
-
-impl Hittable for Sphere {
-    fn hit(&self, ray: &Ray, t_min: f32, t_max: f32) -> Option<RayImpact> {
-        let oc: Vector = ray.origin - self.center;
-        let a = ray.direction.norm_squared();
-        let half_b = oc.dot(&ray.direction);
-        let c = oc.norm_squared() - self.radius * self.radius;
-        let discriminant = f32::powi(half_b, 2) - a * c;
-        if discriminant < 0.0 {
-            return None;
-        }
-
-        let discriminant_sqrt = discriminant.sqrt();
-        // Find the nearest root that lies in the acceptable range of t
-        let root = (-half_b - discriminant_sqrt) / a;
-        if root < t_min || root > t_max {
-            let root = (-half_b + discriminant_sqrt) / a;
-            if root < t_min || root > t_max {
-                return None;
-            }
-        }
-        let point = ray.at(root);
-        let outward_normal = (point - self.center) / self.radius;
-        Some(RayImpact::new(&point, root, ray, &outward_normal))
-    }
-}
-
-struct HittableList {
-    objects: Vec<Box<dyn Hittable>>,
-}
-
-impl Hittable for HittableList {
-    fn hit(&self, ray: &Ray, t_min: f32, t_max: f32) -> Option<RayImpact> {
-        let mut closest_impact: Option<RayImpact> = None;
-        let mut closest_so_far = t_max;
-        for object in &self.objects {
-            if let Some(impact) = object.hit(ray, t_min, closest_so_far) {
-                closest_so_far = impact.t;
-                closest_impact = Some(impact);
-            }
-        }
-        closest_impact
-    }
-}
 
 fn main() -> std::io::Result<()> {
     let aspect_ratio = 16.0 / 9.0;
