@@ -16,11 +16,11 @@ impl Ray {
     }
     pub fn color(&self, world: &HittableList) -> Color {
         if let Some(impact) = world.hit(&self, 0.0, f32::MAX) {
-            return 0.5 * (impact.normal + Color::new(1.0, 1.0, 1.0));
+            return 0.5 * (impact.normal + Color::ones());
         }
         let unit_direction = self.direction.as_unit_vector();
         let t = 0.5 * (unit_direction.y + 1.0);
-        Color::new(1.0, 1.0, 1.0) * (1.0 - t) + Color::new(0.5, 0.7, 1.0) * t
+        Color::ones() * (1.0 - t) + Color::new(0.5, 0.7, 1.0) * t
     }
 }
 

@@ -59,7 +59,7 @@ fn main() -> std::io::Result<()> {
     for y in (0..image_height).rev() {
         bar.inc(1);
         for x in 0..image_width {
-            let mut color = Color::new(0.0, 0.0, 0.0);
+            let mut color = Color::zeros();
             for _ in 0..samples_per_pixel {
                 let u = (x as f32 + rng.gen::<f32>()) / (image_width as f32 - 1.0);
                 let v = (y as f32 + rng.gen::<f32>()) / (image_height as f32 - 1.0);

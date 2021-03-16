@@ -12,6 +12,12 @@ impl Vector {
     pub fn new(x: f32, y: f32, z: f32) -> Vector {
         Vector { x, y, z }
     }
+    pub fn zeros() -> Vector {
+        Vector::new(0.0, 0.0, 0.0)
+    }
+    pub fn ones() -> Vector {
+        Vector::new(1.0, 1.0, 1.0)
+    }
     pub fn norm_squared(&self) -> f32 {
         self.x * self.x + self.y * self.y + self.z * self.z
     }
