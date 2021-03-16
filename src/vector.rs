@@ -37,6 +37,9 @@ impl Vector {
             }
         }
     }
+    pub fn random_unit_vector(rng: &mut rand::rngs::ThreadRng) -> Vector {
+        Vector::random_in_unit_sphere(rng).as_unit_vector()
+    }
     pub fn norm_squared(&self) -> f32 {
         self.x * self.x + self.y * self.y + self.z * self.z
     }
