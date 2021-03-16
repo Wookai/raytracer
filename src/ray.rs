@@ -10,6 +10,12 @@ pub struct Ray {
     pub direction: Vector,
 }
 
+pub enum DiffuseScattering {
+    Lambertian,
+    LambertianApproximation,
+    Hemispherical,
+}
+
 impl Ray {
     pub fn at(&self, time: f32) -> Point {
         self.origin + self.direction * time
@@ -19,6 +25,7 @@ impl Ray {
         world: &HittableList,
         rng: &mut rand::rngs::ThreadRng,
         depth: i16,
+        scattering_method: &DiffuseScattering,
     ) -> Color {
         // After too many bounces, no more light is gathered.
         if depth <= 0 {
@@ -26,12 +33,22 @@ impl Ray {
         }
 
         if let Some(impact) = world.hit(&self, 0.001, f32::MAX) {
-            let target = impact.point + impact.normal + Vector::random_unit_vector(rng);
+            let random_direction: Vector;
+            match scattering_method {
+                DiffuseScattering::LambertianApproximation => {
+                    random_direction = Vector::random_in_unit_sphere(rng)
+                }
+                DiffuseScattering::Lambertian => random_direction = Vector::random_unit_vector(rng),
+                DiffuseScattering::Hemispherical => {
+                    random_direction = Vector::random_in_unit_sphere(rng)
+                }
+            }
+            let target = impact.point + impact.normal + random_direction;
             let reflection = Ray {
                 origin: impact.point,
                 direction: target - impact.point,
             };
-            return 0.5 * reflection.color(world, rng, depth - 1);
+            return 0.5 * reflection.color(world, rng, depth - 1, &scattering_method);
         }
         let unit_direction = self.direction.as_unit_vector();
         let t = 0.5 * (unit_direction.y + 1.0);

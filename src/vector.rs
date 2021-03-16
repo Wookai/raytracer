@@ -40,6 +40,14 @@ impl Vector {
     pub fn random_unit_vector(rng: &mut rand::rngs::ThreadRng) -> Vector {
         Vector::random_in_unit_sphere(rng).as_unit_vector()
     }
+    pub fn random_in_hemisphere(rng: &mut rand::rngs::ThreadRng, normal: &Vector) -> Vector {
+        let in_unit_sphere = Vector::random_in_unit_sphere(rng);
+        if in_unit_sphere.dot(normal) > 0.0 {
+            in_unit_sphere
+        } else {
+            in_unit_sphere * -1.0
+        }
+    }
     pub fn norm_squared(&self) -> f32 {
         self.x * self.x + self.y * self.y + self.z * self.z
     }
