@@ -14,9 +14,14 @@ impl Ray {
     pub fn at(&self, time: f32) -> Point {
         self.origin + self.direction * time
     }
-    pub fn color(&self, world: &HittableList) -> Color {
+    pub fn color(&self, world: &HittableList, rng: &mut rand::rngs::ThreadRng) -> Color {
         if let Some(impact) = world.hit(&self, 0.0, f32::MAX) {
-            return 0.5 * (impact.normal + Color::ones());
+            let target = impact.point + impact.normal + Vector::random_in_unit_sphere(rng);
+            let reflection = Ray {
+                origin: impact.point,
+                direction: target - impact.point,
+            };
+            return 0.5 * reflection.color(world, rng);
         }
         let unit_direction = self.direction.as_unit_vector();
         let t = 0.5 * (unit_direction.y + 1.0);

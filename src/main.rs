@@ -63,7 +63,7 @@ fn main() -> std::io::Result<()> {
             for _ in 0..samples_per_pixel {
                 let u = (x as f32 + rng.gen::<f32>()) / (image_width as f32 - 1.0);
                 let v = (y as f32 + rng.gen::<f32>()) / (image_height as f32 - 1.0);
-                color += camera.get_ray(u, v).color(&world);
+                color += camera.get_ray(u, v).color(&world, &mut rng);
             }
             write_color(&color, samples_per_pixel, &file)?;
         }

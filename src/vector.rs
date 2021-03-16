@@ -1,3 +1,4 @@
+use rand::Rng;
 use std::ops;
 use std::ops::AddAssign;
 
@@ -17,6 +18,24 @@ impl Vector {
     }
     pub fn ones() -> Vector {
         Vector::new(1.0, 1.0, 1.0)
+    }
+    pub fn random(rng: &mut rand::rngs::ThreadRng) -> Vector {
+        Vector::new(rng.gen(), rng.gen(), rng.gen())
+    }
+    pub fn random_in_range(rng: &mut rand::rngs::ThreadRng, min: f32, max: f32) -> Vector {
+        Vector::new(
+            rng.gen_range(min..max),
+            rng.gen_range(min..max),
+            rng.gen_range(min..max),
+        )
+    }
+    pub fn random_in_unit_sphere(rng: &mut rand::rngs::ThreadRng) -> Vector {
+        loop {
+            let v = Vector::random(rng);
+            if v.norm_squared() < 1.0 {
+                return v;
+            }
+        }
     }
     pub fn norm_squared(&self) -> f32 {
         self.x * self.x + self.y * self.y + self.z * self.z
