@@ -25,7 +25,7 @@ impl Ray {
             return Color::zeros();
         }
 
-        if let Some(impact) = world.hit(&self, 0.0, f32::MAX) {
+        if let Some(impact) = world.hit(&self, 0.001, f32::MAX) {
             let target = impact.point + impact.normal + Vector::random_in_unit_sphere(rng);
             let reflection = Ray {
                 origin: impact.point,
