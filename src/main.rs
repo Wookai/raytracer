@@ -25,8 +25,16 @@ fn write_color(
     samples_per_pixel: u32,
     mut file: &std::fs::File,
 ) -> std::io::Result<()> {
-    let color = 255.0 / (samples_per_pixel as f32) * color_stack;
-    writeln!(&mut file, "{:.0} {:.0} {:.0}", color.x, color.y, color.z)?;
+    let r = color_stack.x;
+    let g = color_stack.y;
+    let b = color_stack.z;
+
+    // Rescale colors by the number of samples and gamma-correct with gamma=2.0
+    let scale = 1.0 / samples_per_pixel as f32;
+    let rescale =
+        |v: f32| -> i32 { ((v * scale).sqrt().clamp(0.0, 0.9999) * 256.0).trunc() as i32 };
+
+    writeln!(&mut file, "{} {} {}", rescale(r), rescale(g), rescale(b))?;
     Ok(())
 }
 
