@@ -60,8 +60,16 @@ impl Vector {
     pub fn dot(&self, rhs: &Vector) -> f32 {
         self.x * rhs.x + self.y * rhs.y + self.z * rhs.z
     }
+    pub fn is_almost_zero(&self) -> bool {
+        let sensitivity = 1e-8;
+        self.x.abs() < sensitivity && self.y.abs() < sensitivity && self.z.abs() < sensitivity
+    }
+    pub fn reflect(&self, normal: &Vector) -> Vector {
+        self - 2.0 * self.dot(normal) * normal
+    }
 }
 
+impl_op_ex!(*|a: &Vector, b: &Vector| -> Vector { Vector::new(a.x * b.x, a.y * b.y, a.z * b.z) });
 impl_op_ex!(+|a: &Vector, b: &Vector| -> Vector { Vector::new(a.x + b.x, a.y + b.y, a.z + b.z)});
 impl_op_ex!(-|a: &Vector, b: &Vector| -> Vector { Vector::new(a.x - b.x, a.y - b.y, a.z - b.z) });
 impl_op_ex_commutative!(+|a: &Vector, b: f32| -> Vector {

@@ -1,13 +1,15 @@
 use crate::hittable::Hittable;
+use crate::material::Material;
 use crate::ray::{Ray, RayImpact};
 use crate::vector::Vector;
+use std::rc::Rc;
 
 use Vector as Point;
 
-#[derive(Debug)]
 pub struct Sphere {
     pub center: Point,
     pub radius: f32,
+    pub material: Rc<dyn Material>,
 }
 
 impl Hittable for Sphere {
@@ -32,6 +34,12 @@ impl Hittable for Sphere {
         }
         let point = ray.at(root);
         let outward_normal = (point - self.center) / self.radius;
-        Some(RayImpact::new(&point, root, ray, &outward_normal))
+        Some(RayImpact::new(
+            &point,
+            root,
+            ray,
+            &outward_normal,
+            Rc::clone(&self.material),
+        ))
     }
 }
