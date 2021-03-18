@@ -51,9 +51,11 @@ fn create_world() -> HittableList {
     };
     let metal_left = Metal {
         albedo: Color::ones() * 0.8,
+        fuzz: 0.2,
     };
     let metal_right = Metal {
         albedo: Color::new(0.8, 0.6, 0.2),
+        fuzz: 0.9,
     };
 
     let mut world = HittableList {

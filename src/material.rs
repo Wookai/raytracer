@@ -30,10 +30,12 @@ impl Material for Lambertian {
 
 pub struct Metal {
     pub albedo: Color,
+    pub fuzz: f32, // Fuzzing factor for reflections, similar to brushed metal. 0 means no fuzzing.
 }
 impl Material for Metal {
-    fn scatter(&self, ray: &Ray, impact: &RayImpact, _: &mut ThreadRng) -> Option<(Ray, Color)> {
-        let reflection = ray.direction.as_unit_vector().reflect(&impact.normal);
+    fn scatter(&self, ray: &Ray, impact: &RayImpact, rng: &mut ThreadRng) -> Option<(Ray, Color)> {
+        let reflection = ray.direction.as_unit_vector().reflect(&impact.normal)
+            + self.fuzz.clamp(0.0, 1.0) * Vector::random_in_unit_sphere(rng);
 
         if reflection.dot(&impact.normal) > 0.0 {
             let scattered_ray = Ray {
