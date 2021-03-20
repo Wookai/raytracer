@@ -42,19 +42,19 @@ fn write_color(
 }
 
 fn create_world() -> HittableList {
-    let material_ground = Lambertian {
+    let material_ground: Rc<dyn Material> = Rc::new(Lambertian {
         albedo: Color::new(0.8, 0.8, 0.0),
-    };
-    let material_center = Lambertian {
+    });
+    let material_center: Rc<dyn Material> = Rc::new(Lambertian {
         albedo: Color::new(0.1, 0.2, 0.5),
-    };
-    let material_left = Dielectric {
+    });
+    let material_left: Rc<dyn Material> = Rc::new(Dielectric {
         index_of_refraction: 1.5,
-    };
-    let material_right = Metal {
+    });
+    let material_right: Rc<dyn Material> = Rc::new(Metal {
         albedo: Color::new(0.8, 0.6, 0.2),
         fuzz: 0.0,
-    };
+    });
 
     let mut world = HittableList {
         objects: Vec::new(),
@@ -62,22 +62,27 @@ fn create_world() -> HittableList {
     world.objects.push(Box::new(Sphere {
         center: Point::new(0.0, -100.5, -1.0),
         radius: 100.0,
-        material: Rc::new(material_ground),
+        material: Rc::clone(&material_ground),
     }));
     world.objects.push(Box::new(Sphere {
         center: Point::new(0.0, 0.0, -1.0),
         radius: 0.5,
-        material: Rc::new(material_center),
+        material: Rc::clone(&material_center),
     }));
     world.objects.push(Box::new(Sphere {
         center: Point::new(-1.0, 0.0, -1.0),
         radius: 0.5,
-        material: Rc::new(material_left),
+        material: Rc::clone(&material_left),
+    }));
+    world.objects.push(Box::new(Sphere {
+        center: Point::new(-1.0, 0.0, -1.0),
+        radius: -0.4,
+        material: Rc::clone(&material_left),
     }));
     world.objects.push(Box::new(Sphere {
         center: Point::new(1.0, 0.0, -1.0),
         radius: 0.5,
-        material: Rc::new(material_right),
+        material: Rc::clone(&material_right),
     }));
 
     world
