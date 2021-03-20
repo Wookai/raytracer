@@ -1,6 +1,7 @@
 use crate::ray::{Ray, RayImpact};
 use crate::vector::Vector;
 use rand::rngs::ThreadRng;
+use rand::Rng;
 
 use Vector as Color;
 
@@ -52,8 +53,15 @@ impl Material for Metal {
 pub struct Dielectric {
     pub index_of_refraction: f32,
 }
+impl Dielectric {
+    fn reflectance(cosine: f32, ref_idx: f32) -> f32 {
+        // Use Schlick's approximation for reflectance
+        let r0 = ((1.0 - ref_idx) / (1.0 + ref_idx)).powi(2);
+        r0 + (1.0 - r0) * (1.0 - cosine).powi(5)
+    }
+}
 impl Material for Dielectric {
-    fn scatter(&self, ray: &Ray, impact: &RayImpact, _: &mut ThreadRng) -> Option<(Ray, Color)> {
+    fn scatter(&self, ray: &Ray, impact: &RayImpact, rng: &mut ThreadRng) -> Option<(Ray, Color)> {
         let attenuation = Color::ones();
         let refraction_ratio = if impact.front_face {
             1.0 / self.index_of_refraction
@@ -65,11 +73,12 @@ impl Material for Dielectric {
         let sin_theta = (1.0 - cos_theta * cos_theta).sqrt();
 
         let cannot_refract = refraction_ratio * sin_theta > 1.0;
-        let direction = if cannot_refract {
-            unit_direction.reflect(&impact.normal)
-        } else {
-            unit_direction.refract(&impact.normal, refraction_ratio)
-        };
+        let direction =
+            if cannot_refract || Dielectric::reflectance(cos_theta, refraction_ratio) > rng.gen() {
+                unit_direction.reflect(&impact.normal)
+            } else {
+                unit_direction.refract(&impact.normal, refraction_ratio)
+            };
         Some((
             Ray {
                 origin: impact.point,
