@@ -34,4 +34,4 @@ jobs:
             "${TWITTER_ACCESS_TOKEN}" \
             "${TWITTER_ACCESS_TOKEN_SECRET}" \
             "$GITHUB_WORKSPACE/foo.ppm" \
-            "${commit_message} https://github.com/Wookai/raytracer/commit/${{ github.event.head_commit.id }} #raytracinginoneweekend #rust #raytracing #learningproject"
+            "${commit_message} https://github.com/Wookai/raytracer/commit/${{ github.event.head_commit.id }} #raytracinginoneweekend #rustlang #raytracing #learningproject"
