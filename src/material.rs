@@ -61,11 +61,19 @@ impl Material for Dielectric {
             self.index_of_refraction
         };
         let unit_direction = ray.direction.as_unit_vector();
-        let refracted = unit_direction.refract(&impact.normal, refraction_ratio);
+        let cos_theta = (-1.0 * unit_direction).dot(&impact.normal).min(1.0);
+        let sin_theta = (1.0 - cos_theta * cos_theta).sqrt();
+
+        let cannot_refract = refraction_ratio * sin_theta > 1.0;
+        let direction = if cannot_refract {
+            unit_direction.reflect(&impact.normal)
+        } else {
+            unit_direction.refract(&impact.normal, refraction_ratio)
+        };
         Some((
             Ray {
                 origin: impact.point,
-                direction: refracted,
+                direction,
             },
             attenuation,
         ))
