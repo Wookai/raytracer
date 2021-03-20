@@ -48,3 +48,26 @@ impl Material for Metal {
         }
     }
 }
+
+pub struct Dielectric {
+    pub index_of_refraction: f32,
+}
+impl Material for Dielectric {
+    fn scatter(&self, ray: &Ray, impact: &RayImpact, _: &mut ThreadRng) -> Option<(Ray, Color)> {
+        let attenuation = Color::ones();
+        let refraction_ratio = if impact.front_face {
+            1.0 / self.index_of_refraction
+        } else {
+            self.index_of_refraction
+        };
+        let unit_direction = ray.direction.as_unit_vector();
+        let refracted = unit_direction.refract(&impact.normal, refraction_ratio);
+        Some((
+            Ray {
+                origin: impact.point,
+                direction: refracted,
+            },
+            attenuation,
+        ))
+    }
+}

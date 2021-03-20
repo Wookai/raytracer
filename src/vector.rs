@@ -67,6 +67,12 @@ impl Vector {
     pub fn reflect(&self, normal: &Vector) -> Vector {
         self - 2.0 * self.dot(normal) * normal
     }
+    pub fn refract(&self, normal: &Vector, etai_over_etat: f32) -> Vector {
+        let cos_theta = (-1.0 * self).dot(normal).min(1.0);
+        let r_out_perp = etai_over_etat * (self + cos_theta * normal);
+        let r_out_parallel = -(1.0 - r_out_perp.norm_squared()).abs().sqrt() * normal;
+        r_out_perp + r_out_parallel
+    }
 }
 
 impl_op_ex!(*|a: &Vector, b: &Vector| -> Vector { Vector::new(a.x * b.x, a.y * b.y, a.z * b.z) });

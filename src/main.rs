@@ -42,20 +42,18 @@ fn write_color(
 }
 
 fn create_world() -> HittableList {
-    // Prepare materials
-    let ground = Lambertian {
+    let material_ground = Lambertian {
         albedo: Color::new(0.8, 0.8, 0.0),
     };
-    let center = Lambertian {
-        albedo: Color::new(0.7, 0.3, 0.3),
+    let material_center = Dielectric {
+        index_of_refraction: 1.5,
     };
-    let metal_left = Metal {
-        albedo: Color::ones() * 0.8,
-        fuzz: 0.2,
+    let material_left = Dielectric {
+        index_of_refraction: 1.5,
     };
-    let metal_right = Metal {
+    let material_right = Metal {
         albedo: Color::new(0.8, 0.6, 0.2),
-        fuzz: 0.9,
+        fuzz: 1.0,
     };
 
     let mut world = HittableList {
@@ -64,22 +62,22 @@ fn create_world() -> HittableList {
     world.objects.push(Box::new(Sphere {
         center: Point::new(0.0, -100.5, -1.0),
         radius: 100.0,
-        material: Rc::new(ground),
+        material: Rc::new(material_ground),
     }));
     world.objects.push(Box::new(Sphere {
         center: Point::new(0.0, 0.0, -1.0),
         radius: 0.5,
-        material: Rc::new(center),
+        material: Rc::new(material_center),
     }));
     world.objects.push(Box::new(Sphere {
         center: Point::new(-1.0, 0.0, -1.0),
         radius: 0.5,
-        material: Rc::new(metal_left),
+        material: Rc::new(material_left),
     }));
     world.objects.push(Box::new(Sphere {
         center: Point::new(1.0, 0.0, -1.0),
         radius: 0.5,
-        material: Rc::new(metal_right),
+        material: Rc::new(material_right),
     }));
 
     world
