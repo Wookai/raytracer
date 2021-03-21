@@ -11,9 +11,12 @@ pub struct Camera {
 }
 
 impl Camera {
-    pub fn new(aspect_ratio: f32) -> Camera {
-        let viewport_height = 2.0;
+    pub fn new(vertical_field_of_view_degrees: f32, aspect_ratio: f32) -> Camera {
+        let theta = vertical_field_of_view_degrees * std::f32::consts::PI / 180.0;
+        let h = (theta / 2.0).tan();
+        let viewport_height = 2.0 * h;
         let viewport_width = aspect_ratio * viewport_height;
+
         let focal_length = 1.0;
         let origin = Point::zeros();
         let horizontal = Vector::new(viewport_width, 0.0, 0.0);
