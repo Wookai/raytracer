@@ -60,6 +60,13 @@ impl Vector {
     pub fn dot(&self, rhs: &Vector) -> f32 {
         self.x * rhs.x + self.y * rhs.y + self.z * rhs.z
     }
+    pub fn cross(&self, rhs: &Vector) -> Vector {
+        Vector::new(
+            self.y * rhs.z - self.z * rhs.y,
+            self.z * rhs.x - self.x * rhs.z,
+            self.x * rhs.y - self.y * rhs.x,
+        )
+    }
     pub fn is_almost_zero(&self) -> bool {
         let sensitivity = 1e-8;
         self.x.abs() < sensitivity && self.y.abs() < sensitivity && self.z.abs() < sensitivity

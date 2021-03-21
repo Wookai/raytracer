@@ -11,18 +11,27 @@ pub struct Camera {
 }
 
 impl Camera {
-    pub fn new(vertical_field_of_view_degrees: f32, aspect_ratio: f32) -> Camera {
+    pub fn new(
+        look_from: Point,
+        look_at: Point,
+        up_direction: Vector,
+        vertical_field_of_view_degrees: f32,
+        aspect_ratio: f32,
+    ) -> Camera {
         let theta = vertical_field_of_view_degrees * std::f32::consts::PI / 180.0;
         let h = (theta / 2.0).tan();
         let viewport_height = 2.0 * h;
         let viewport_width = aspect_ratio * viewport_height;
 
-        let focal_length = 1.0;
-        let origin = Point::zeros();
-        let horizontal = Vector::new(viewport_width, 0.0, 0.0);
-        let vertical = Vector::new(0.0, viewport_height, 0.0);
+        let reverse_direction_of_view = (look_from - look_at).as_unit_vector();
+        let image_right_direction = up_direction.cross(&reverse_direction_of_view);
+        let iamge_up_direction = reverse_direction_of_view.cross(&image_right_direction);
+
+        let origin = look_from;
+        let horizontal = viewport_width * image_right_direction;
+        let vertical = viewport_height * iamge_up_direction;
         let lower_left_corner: Vector =
-            origin - horizontal / 2.0 - vertical / 2.0 - Vector::new(0.0, 0.0, focal_length);
+            origin - horizontal / 2.0 - vertical / 2.0 - reverse_direction_of_view;
 
         Camera {
             origin,
@@ -32,10 +41,10 @@ impl Camera {
         }
     }
 
-    pub fn get_ray(&self, u: f32, v: f32) -> Ray {
+    pub fn get_ray(&self, s: f32, t: f32) -> Ray {
         Ray {
             origin: self.origin,
-            direction: self.lower_left_corner + self.horizontal * u + self.vertical * v
+            direction: self.lower_left_corner + self.horizontal * s + self.vertical * t
                 - self.origin,
         }
     }

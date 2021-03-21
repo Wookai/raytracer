@@ -42,25 +42,46 @@ fn write_color(
 }
 
 fn create_world() -> HittableList {
-    let material_left: Rc<dyn Material> = Rc::new(Lambertian {
-        albedo: Color::new(0.0, 0.0, 1.0),
+    let material_ground: Rc<dyn Material> = Rc::new(Lambertian {
+        albedo: Color::new(0.8, 0.8, 0.0),
     });
-    let material_right: Rc<dyn Material> = Rc::new(Lambertian {
-        albedo: Color::new(1.0, 0.0, 0.0),
+    let material_center: Rc<dyn Material> = Rc::new(Lambertian {
+        albedo: Color::new(0.1, 0.2, 0.5),
+    });
+    let material_left: Rc<dyn Material> = Rc::new(Dielectric {
+        index_of_refraction: 1.5,
+    });
+    let material_right: Rc<dyn Material> = Rc::new(Metal {
+        albedo: Color::new(0.8, 0.6, 0.2),
+        fuzz: 0.0,
     });
 
-    let radius = (std::f32::consts::PI / 4.0).cos();
     let mut world = HittableList {
         objects: Vec::new(),
     };
     world.objects.push(Box::new(Sphere {
-        center: Point::new(-radius, 0.0, -1.0),
-        radius,
+        center: Point::new(0.0, -100.5, -1.0),
+        radius: 100.0,
+        material: Rc::clone(&material_ground),
+    }));
+    world.objects.push(Box::new(Sphere {
+        center: Point::new(0.0, 0.0, -1.0),
+        radius: 0.5,
+        material: Rc::clone(&material_center),
+    }));
+    world.objects.push(Box::new(Sphere {
+        center: Point::new(-1.0, 0.0, -1.0),
+        radius: 0.5,
         material: Rc::clone(&material_left),
     }));
     world.objects.push(Box::new(Sphere {
-        center: Point::new(radius, 0.0, -1.0),
-        radius,
+        center: Point::new(-1.0, 0.0, -1.0),
+        radius: -0.45,
+        material: Rc::clone(&material_left),
+    }));
+    world.objects.push(Box::new(Sphere {
+        center: Point::new(1.0, 0.0, -1.0),
+        radius: 0.5,
         material: Rc::clone(&material_right),
     }));
 
@@ -74,7 +95,12 @@ fn main() -> std::io::Result<()> {
     let samples_per_pixel = 100;
     let max_ray_depth: i16 = 50;
 
-    let camera = Camera::new(90.0, aspect_ratio);
+    let look_from = Point::new(-1.0, 1.0, 0.5);
+    let look_at = Point::new(0.0, 0.0, -1.0);
+    let up_direction = Point::new(0.0, 1.0, 0.0);
+    let vertical_fov = 80.0;
+    let camera = Camera::new(look_from, look_at, up_direction, vertical_fov, aspect_ratio);
+
     let world = create_world();
 
     let mut file = File::create("foo.ppm")?;
