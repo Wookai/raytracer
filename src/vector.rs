@@ -31,7 +31,7 @@ impl Vector {
     }
     pub fn random_in_unit_sphere(rng: &mut rand::rngs::ThreadRng) -> Vector {
         loop {
-            let v = Vector::random(rng);
+            let v = Vector::random_in_range(rng, -1.0, 1.0);
             if v.norm_squared() < 1.0 {
                 return v;
             }
