@@ -95,11 +95,22 @@ fn main() -> std::io::Result<()> {
     let samples_per_pixel = 100;
     let max_ray_depth: i16 = 50;
 
-    let look_from = Point::new(-1.0, 1.0, 0.5);
+    let look_from = Point::new(-2.0, 2.0, 1.0);
     let look_at = Point::new(0.0, 0.0, -1.0);
     let up_direction = Point::new(0.0, 1.0, 0.0);
-    let vertical_fov = 80.0;
-    let camera = Camera::new(look_from, look_at, up_direction, vertical_fov, aspect_ratio);
+    let vertical_field_of_view_degrees = 20.0;
+    let distance_to_focus = (look_from - look_at).norm();
+    let aperture = 1.0;
+
+    let camera = Camera::new(
+        look_from,
+        look_at,
+        up_direction,
+        vertical_field_of_view_degrees,
+        aspect_ratio,
+        aperture,
+        distance_to_focus,
+    );
 
     let world = create_world();
 
@@ -116,7 +127,9 @@ fn main() -> std::io::Result<()> {
             for _ in 0..samples_per_pixel {
                 let u = (x as f32 + rng.gen::<f32>()) / (image_width as f32 - 1.0);
                 let v = (y as f32 + rng.gen::<f32>()) / (image_height as f32 - 1.0);
-                color += camera.get_ray(u, v).color(&world, &mut rng, max_ray_depth);
+                color += camera
+                    .get_ray(u, v, &mut rng)
+                    .color(&world, &mut rng, max_ray_depth);
             }
             write_color(&color, samples_per_pixel, &file)?;
         }
